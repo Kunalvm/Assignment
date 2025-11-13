@@ -1,0 +1,166 @@
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Course / Faculty Feedback (Anonymous)</title>
+  <style>
+    body {
+      font-family: system-ui, Segoe UI, Arial;
+      padding: 24px;
+      max-width: 720px;
+      margin: 0 auto;
+      background: #f4f6f9;
+      color: #222;
+    }
+    h1 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 10px;
+    }
+    form {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      margin-top: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 16px;
+      font-weight: 600;
+      color: #34495e;
+    }
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 6px;
+      border: 1px solid #ccd1d9;
+      border-radius: 8px;
+      outline: none;
+      font-size: 15px;
+      background: #fbfcfd;
+      transition: border 0.2s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: #4a90e2;
+    }
+    button {
+      margin-top: 18px;
+      padding: 12px 18px;
+      background: #4a90e2;
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button:hover {
+      background: #357ab7;
+    }
+    #status {
+      text-align: center;
+      font-weight: 600;
+      color: #2c3e50;
+    }
+    .note{
+      font-size:0.9rem;
+      color:#666;
+      text-align:center;
+    }
+  </style>
+</head>
+<body>
+  <h1>Course / Faculty Feedback</h1>
+  <p class="note">Your feedback is anonymous. Do not include names or personal details.</p>
+
+  <form id="fbForm">
+    <label>Faculty Name or Course Code (one field)
+      <input type="text" id="facultyId" maxlength="100" placeholder="e.g. CS101 or Prof. X" required>
+    </label>
+
+    <label>Rating (1–5)
+      <select id="rating" required>
+        <option value="">Select</option>
+        <option>1</option>
+        <option>2</option>
+        <option>3</option>
+        <option>4</option>
+        <option>5</option>
+      </select>
+    </label>
+
+    <label>Feedback Category
+      <select id="category" required>
+        <option value="">Select</option>
+        <option>Teaching</option>
+        <option>Course Material</option>
+        <option>Evaluation</option>
+        <option>Infrastructure</option>
+        <option>Other</option>
+      </select>
+    </label>
+
+    <label>Comments (do not include names, emails, or phone numbers)
+      <textarea id="comments" rows="6" maxlength="2000" placeholder="Your feedback..." required></textarea>
+    </label>
+
+    <button type="submit">Submit Feedback</button>
+  </form>
+
+  <div id="status" style="margin-top:12px"></div>
+
+  <script>
+    const FUNCTION_URL = 'https://AZURE_FUNCTION_URL/api/FeedbackHttpTrigger'; // <-- replace with your function URL
+
+    const form = document.getElementById('fbForm');
+    const status = document.getElementById('status');
+
+    function sanitizeText(s){
+      // remove obvious emails/phones client-side (server will also sanitize)
+      return s.replace(/\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b/g, '[redacted]')
+              .replace(/\+?\d[\d ()-]{6,}\d/g, '[redacted]');
+    }
+
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      status.textContent = '';
+
+      const payload = {
+        facultyId: document.getElementById('facultyId').value.trim().slice(0,100),
+        rating: parseInt(document.getElementById('rating').value,10),
+        category: document.getElementById('category').value,
+        comments: sanitizeText(document.getElementById('comments').value.trim()).slice(0,2000)
+      };
+
+      // Basic client validation
+      if(!payload.facultyId || !payload.rating || !payload.category){
+        status.textContent = 'Please fill all required fields.';
+        return;
+      }
+
+      try{
+        const r = await fetch(FUNCTION_URL, {
+          method: 'POST',
+          headers: {'Content-Type':'application/json'},
+          body: JSON.stringify(payload)
+        });
+
+        if(r.ok){
+          status.textContent = 'Thank you — feedback submitted.';
+          form.reset();
+        }else{
+          const txt = await r.text();
+          status.textContent = 'Error submitting: ' + (txt || r.status);
+        }
+      }catch(err){
+        status.textContent = 'Network error: ' + err.message;
+      }
+    });
+  </script>
+</body>
+</html>
+
+
