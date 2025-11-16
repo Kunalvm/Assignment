@@ -1,167 +1,180 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Course / Faculty Feedback (Anonymous)</title>
-  <style>
+<meta charset="UTF-8">
+<title>Anonymous Faculty Feedback</title>
+
+<style>
     body {
-      font-family: system-ui, Segoe UI, Arial;
-      padding: 24px;
-      max-width: 720px;
-      margin: 0 auto;
-      background: #f4f6f9;
-      color: #222;
+        font-family: Arial, sans-serif;
+        max-width: 700px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #f7f7f7;
     }
+
     h1 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 10px;
+        text-align: center;
     }
+
     form {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.08);
-      margin-top: 20px;
+        background: #fff;
+        padding: 20px;
+        border-radius: 10px;
+        display: grid;
+        gap: 15px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
+
     label {
-      display: block;
-      margin-top: 16px;
-      font-weight: 600;
-      color: #34495e;
+        font-weight: bold;
     }
+
     input, select, textarea {
-      width: 100%;
-      padding: 10px;
-      margin-top: 6px;
-      border: 1px solid #ccd1d9;
-      border-radius: 8px;
-      outline: none;
-      font-size: 15px;
-      background: #fbfcfd;
-      transition: border 0.2s;
+        width: 100%;
+        padding: 10px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 16px;
     }
-    input:focus, select:focus, textarea:focus {
-      border-color: #4a90e2;
+
+    textarea {
+        height: 120px;
+        resize: vertical;
     }
+
     button {
-      margin-top: 18px;
-      padding: 12px 18px;
-      background: #4a90e2;
-      border: none;
-      border-radius: 8px;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.2s;
+        padding: 12px;
+        background: #0066ff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 18px;
     }
+
     button:hover {
-      background: #357ab7;
+        background: #004ccc;
     }
-    #status {
-      text-align: center;
-      font-weight: 600;
-      color: #2c3e50;
+
+    .note {
+        font-size: 14px;
+        background: #eef3ff;
+        padding: 10px;
+        border-left: 4px solid #3366ff;
+        border-radius: 6px;
     }
-    .note{
-      font-size:0.9rem;
-      color:#666;
-      text-align:center;
+
+    .success {
+        color: green;
+        font-weight: bold;
     }
-  </style>
+
+    .error {
+        color: red;
+        font-weight: bold;
+    }
+</style>
+
 </head>
 <body>
-  <h1>Course / Faculty Feedback</h1>
-  <p class="note">Your feedback is anonymous. Do not include names or personal details.</p>
 
-  <form id="fbForm">
-    <label>Faculty Name or Course Code (one field)
-      <input type="text" id="facultyId" maxlength="100" placeholder="e.g. CS101 or Prof. X" required>
-    </label>
+<h1>Anonymous Faculty Feedback</h1>
 
-    <label>Rating (1–5)
-      <select id="rating" required>
-        <option value="">Select</option>
-        <option>1</option>
-        <option>2</option>
-        <option>3</option>
-        <option>4</option>
-        <option>5</option>
-      </select>
-    </label>
+<p class="note">Your feedback is anonymous. <strong>Do not include any personal details.</strong></p>
 
-    <label>Feedback Category
-      <select id="category" required>
-        <option value="">Select</option>
-        <option>Teaching</option>
-        <option>Course Material</option>
-        <option>Evaluation</option>
-        <option>Infrastructure</option>
-        <option>Other</option>
-      </select>
-    </label>
+<form id="feedbackForm">
 
-    <label>Comments (do not include names, emails, or phone numbers)
-      <textarea id="comments" rows="6" maxlength="2000" placeholder="Your feedback..." required></textarea>
-    </label>
+    <div>
+        <label>Faculty Name</label>
+        <input id="facultyName" required placeholder="e.g., Dr. Kumar">
+    </div>
+
+    <div>
+        <label>Course Code</label>
+        <input id="courseCode" required placeholder="e.g., CSE101">
+    </div>
+
+    <div>
+        <label>Rating (1–5)</label>
+        <select id="rating" required>
+            <option value="">Select</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Feedback Category</label>
+        <select id="category" required>
+            <option value="">Select</option>
+            <option>Teaching quality</option>
+            <option>Course content</option>
+            <option>Assignments</option>
+            <option>Assessment</option>
+            <option>Classroom environment</option>
+            <option>Other</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Comments</label>
+        <textarea id="comments" placeholder="Your anonymous feedback..."></textarea>
+    </div>
 
     <button type="submit">Submit Feedback</button>
-  </form>
 
-  <div id="status" style="margin-top:12px"></div>
+    <p id="message"></p>
+</form>
 
-  <script>
-    const FUNCTION_URL = '/api/Submit_Fd'; // <-- replace with your function URL
+<script>
+    const functionUrl = "/api/SubmitFeedBack"; // ← replace
 
-    const form = document.getElementById('fbForm');
-    const status = document.getElementById('status');
+    document.getElementById("feedbackForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
 
-    function sanitizeText(s){
-      // remove obvious emails/phones client-side (server will also sanitize)
-      return s.replace(/\b[\w.%+-]+@[\w.-]+\.[A-Za-z]{2,}\b/g, '[redacted]')
-              .replace(/\+?\d[\d ()-]{6,}\d/g, '[redacted]');
-    }
+        const msg = document.getElementById("message");
+        msg.textContent = "";
+        msg.className = "";
 
-    form.addEventListener('submit', async (e)=>{
-      e.preventDefault();
-      status.textContent = '';
+        const payload = {
+            faculty_name: facultyName.value.trim(),
+            course_code: courseCode.value.trim(),
+            rating: parseInt(rating.value),
+            category: category.value.trim(),
+            comments: comments.value.trim()
+        };
 
-      const payload = {
-        facultyId: document.getElementById('facultyId').value.trim().slice(0,100),
-        rating: parseInt(document.getElementById('rating').value,10),
-        category: document.getElementById('category').value,
-        comments: sanitizeText(document.getElementById('comments').value.trim()).slice(0,2000)
-      };
-
-      // Basic client validation
-      if(!payload.facultyId || !payload.rating || !payload.category){
-        status.textContent = 'Please fill all required fields.';
-        return;
-      }
-
-      try{
-        const r = await fetch(FUNCTION_URL, {
-          method: 'POST',
-          headers: {'Content-Type':'application/json'},
-          body: JSON.stringify(payload)
-        });
-
-        if(r.ok){
-          status.textContent = 'Thank you — feedback submitted.';
-          form.reset();
-        }else{
-          const txt = await r.text();
-          status.textContent = 'Error submitting: ' + (txt || r.status);
+        if (!payload.faculty_name || !payload.course_code || !payload.rating || !payload.category) {
+            msg.textContent = "All fields except comments are required.";
+            msg.className = "error";
+            return;
         }
-      }catch(err){
-        status.textContent = 'Network error: ' + err.message;
-      }
+
+        try {
+            const res = await fetch(functionUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                msg.textContent = "Your anonymous feedback has been submitted!";
+                msg.className = "success";
+                document.getElementById("feedbackForm").reset();
+            } else {
+                msg.textContent = "Error submitting feedback.";
+                msg.className = "error";
+            }
+        } catch (err) {
+            msg.textContent = "Network error: " + err.message;
+            msg.className = "error";
+        }
     });
-  </script>
+</script>
+
 </body>
 </html>
-
-
-
